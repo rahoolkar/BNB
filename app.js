@@ -25,11 +25,17 @@ main().then(()=>{
 app.get("/listings",(req,res)=>{
     Listing.find({}).then((result)=>{
         let allListing = result;
-        //res.send(allListing);
-        res.render("index.ejs",{allListing});
+        res.render("Listings/index.ejs",{allListing});
     }).catch((error)=>{
         res.send("error :(")
     })
+})
+
+//show route
+app.get("/listings/:id",async (req,res)=>{
+    let {id} = req.params;
+    const data = await Listing.findById(id);
+    res.render("Listings/show.ejs",{data});
 })
 
 app.listen(port,()=>{
