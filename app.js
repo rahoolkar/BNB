@@ -83,6 +83,13 @@ app.get("/listings/:id",(req,res)=>{
     })
 })
 
+//delete request
+app.delete("/listings/:id",async (req,res)=>{
+    let {id} = req.params;
+    await Listing.findByIdAndDelete(id);
+    res.redirect("/listings");
+})
+
 app.listen(port,()=>{
     console.log("app is running on server 8080")
 })

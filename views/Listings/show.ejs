@@ -14,6 +14,9 @@
         <li><%= data.location %></li>
         <li><%= data.country %></li>
     </ul>
-    <a href="/listings/<%= data._id %>/edit">Edit this Listing</a>
+    <a href="/listings/<%= data._id %>/edit">Edit this Listing</a><br>
+    <form action="/listings/<%= data._id %>?_method=DELETE" method="post">
+        <button>Delete</button>
+    </form>
 </body>
 </html>
