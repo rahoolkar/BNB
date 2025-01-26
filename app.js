@@ -93,6 +93,10 @@ app.delete("/listings/:id",async (req,res)=>{
     res.redirect("/listings");
 })
 
+app.get("/",(req,res)=>{
+    res.send("hello konichiwa arigatto namaste nodejs");
+})
+
 app.listen(port,()=>{
     console.log("app is running on server 8080")
 })
