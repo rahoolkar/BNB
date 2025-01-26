@@ -18,7 +18,7 @@ async function main() {
 main().then(()=>{
     console.log("connection is created");
 }).catch((error)=>{
-    console.log("error :(")
+    console.log(":(")
 })
 
 //index route 
@@ -27,15 +27,43 @@ app.get("/listings",(req,res)=>{
         let allListing = result;
         res.render("Listings/index.ejs",{allListing});
     }).catch((error)=>{
-        res.send("error :(")
+        res.send(":(")
     })
 })
 
+//new route 
+app.get("/listings/new",(req,res)=>{
+    res.render("Listings/new.ejs")
+})
+
+//post request
+app.post("/listings",(req,res)=>{
+    let data = req.body;
+
+    let newData = new Listing(data);
+    newData.save().then(()=>{
+        res.redirect("/listings");
+    }).catch(()=>{
+        console.log(":(");
+    })
+    // let {title,description,image,price,location,country} = req.body;
+    // let newData = new Listing({title:title,description:description,image:image,price:price,location:location,country:country});
+    // newData.save().then(()=>{
+    //     res.redirect("/listings")
+    // }).catch(()=>{
+    //     res.send(":(");
+    // })
+})
+
 //show route
-app.get("/listings/:id",async (req,res)=>{
+app.get("/listings/:id",(req,res)=>{
     let {id} = req.params;
-    const data = await Listing.findById(id);
-    res.render("Listings/show.ejs",{data});
+    Listing.findById(id).then((result)=>{
+        let data = result;
+        res.render("Listings/show.ejs",{data});
+    }).catch((error)=>{
+        res.send(":(");
+    })
 })
 
 app.listen(port,()=>{
