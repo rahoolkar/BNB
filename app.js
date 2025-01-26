@@ -3,6 +3,13 @@ const app = express();
 const mongoose = require('mongoose');
 const port = 8080;
 const Listing = require("./models/listing.js");
+const path = require("path");
+
+
+app.set("view engine", "ejs");
+app.set("views",path.join(__dirname,"/views"));
+app.use(express.urlencoded({extended:true}));
+app.use(express.json());
 
 async function main() {
     mongoose.connect('mongodb://127.0.0.1:27017/bnb');
@@ -14,19 +21,14 @@ main().then(()=>{
     console.log("error :(")
 })
 
-app.get("/test",(req,res)=>{
-    let data1 = new Listing({
-        title:"title of the place",
-        description:"discription of the place",
-        price:34000,
-        location:"rohtak",
-        country:"india"
-    })
-
-    data1.save().then(()=>{
-        res.send("successful");
+//index route 
+app.get("/listings",(req,res)=>{
+    Listing.find({}).then((result)=>{
+        let allListing = result;
+        //res.send(allListing);
+        res.render("index.ejs",{allListing});
     }).catch((error)=>{
-        res.send("error");
+        res.send("error :(")
     })
 })
 
