@@ -1,12 +1,41 @@
 <% layout("/layouts/boilerplate") %>
 <body>
-    <form action="/listings/<%= node._id %>?_method=PUT" method="post">
-        <input type="text" name="title" placeholder="enter title" value="<%= node.title %>"><br><br>
-        <textarea name="description" placeholder="enter description"><%= node.description %></textarea><br><br>
-        <input type="text" name="image" placeholder="enter image URL/Link" value="<%= node.image %>"><br><br>
-        <input type="number" name="price" placeholder="enter price" value="<%= node.price %>"><br><br>
-        <input type="text" name="location" placeholder="enter location" value="<%= node.location %>"><br><br>
-        <input type="text" name="country" placeholder="enter country" value="<%= node.country %>"><br><br>
-        <button>Edit Listing</button>
-    </form>
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+            <h3>Edit Your Listing</h3>
+            <form action="/listings/<%= node._id %>?_method=PUT" method="post">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="enter title" value="<%= node.title %>">
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea name="description" class="form-control" id="description" placeholder="enter description"><%= node.description %></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="image" class="form-label">Image</label>
+                    <input type="text" class="form-control" id="image" name="image" placeholder="enter image URL/Link" value="<%= node.image %>">
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" placeholder="enter price" value="<%= node.price %>">
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country" placeholder="enter country" value="<%= node.country %>">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" placeholder="enter location" value="<%= node.location %>">
+                </div>
+                <button class="btn btn-dark mb-3">Edit Listing</button>
+            </form>
+        </div>
+    </div>
 </body>
