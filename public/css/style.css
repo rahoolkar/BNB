@@ -90,6 +90,16 @@ body{
     text-decoration: none;
 }
 
+/* Button */
+.btns{
+    display: flex;
+}
+
+.edit-btn{
+    background-color: #fe424d !important;
+    border: none !important;
+}
+
 /* Overlay Effect */
 .card-img-overlay{
     opacity: 0;
@@ -99,3 +109,14 @@ body{
     opacity: 0.2;
     background-color: white;
 }
+/* Show-Image */
+
+.show-img{
+    height: 30vh;
+}
+
+.show-card{
+    padding-left: 0;
+    padding-right: 0;
+}
+
