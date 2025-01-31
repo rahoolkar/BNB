@@ -8,7 +8,7 @@ var methodOverride = require('method-override');
 var engine = require('ejs-mate')
 const wrapAsync = require("./utils/wrapAsync.js");
 const myError = require("./utils/myError.js");
-
+const listingschema = require("./schema.js");
 
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"/views"));
@@ -46,9 +46,15 @@ app.get("/listings/new",(req,res)=>{
 //post request
 app.post("/listings",wrapAsync(async(req,res,next)=>{
     let data = req.body;
-    let newData = new Listing(data);
-    await newData.save();
-    res.redirect("/listings");
+    let result = listingschema.validate(data);
+    if(result.error){
+        throw new myError(400,result.error);
+    }else{
+        let newData = new Listing(data);
+        await newData.save();
+        res.redirect("/listings");
+    }
+    
 
     // let data = req.body;
     // let newData = new Listing(data);
@@ -114,7 +120,7 @@ app.all("*",(req,res,next)=>{
 //defining a error handling middleware
 app.use((err,req,res,next)=>{
     let {status=500,message="some error occured and we are working on it"} = err ;
-    res.status(status).send(message);
+    res.render("error.ejs",{status,message});
 })
 
 app.listen(port,()=>{
