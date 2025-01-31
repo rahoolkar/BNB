@@ -43,19 +43,24 @@ app.get("/listings/new",(req,res)=>{
     res.render("Listings/new.ejs")
 })
 
-//post request
-app.post("/listings",wrapAsync(async(req,res,next)=>{
+//defining a middleware for the post route
+const validateListing = (req,res,next)=>{
     let data = req.body;
     let result = listingschema.validate(data);
     if(result.error){
         throw new myError(400,result.error);
     }else{
-        let newData = new Listing(data);
-        await newData.save();
-        res.redirect("/listings");
+        next();
     }
-    
+}
 
+//post request
+app.post("/listings",validateListing,wrapAsync(async(req,res,next)=>{
+    let data = req.body;
+    let newData = new Listing(data);
+    await newData.save();
+    res.redirect("/listings");
+    
     // let data = req.body;
     // let newData = new Listing(data);
     // newData.save().then(()=>{
