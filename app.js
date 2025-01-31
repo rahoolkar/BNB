@@ -6,6 +6,7 @@ const Listing = require("./models/listing.js");
 const path = require("path");
 var methodOverride = require('method-override');
 var engine = require('ejs-mate')
+const wrapAsync = require("./utils/wrapAsync.js");
 
 
 app.set("view engine", "ejs");
@@ -42,15 +43,21 @@ app.get("/listings/new",(req,res)=>{
 })
 
 //post request
-app.post("/listings",(req,res)=>{
+app.post("/listings",wrapAsync(async(req,res,next)=>{
     let data = req.body;
-
     let newData = new Listing(data);
-    newData.save().then(()=>{
-        res.redirect("/listings");
-    }).catch(()=>{
-        console.log(":(");
-    })
+    await newData.save();
+    res.redirect("/listings");
+
+    // let data = req.body;
+    // let newData = new Listing(data);
+    // newData.save().then(()=>{
+    //     res.redirect("/listings");
+    // }).catch((err)=>{
+    //     next(err);
+    // })
+
+
     // let {title,description,image,price,location,country} = req.body;
     // let newData = new Listing({title:title,description:description,image:image,price:price,location:location,country:country});
     // newData.save().then(()=>{
@@ -58,7 +65,7 @@ app.post("/listings",(req,res)=>{
     // }).catch(()=>{
     //     res.send(":(");
     // })
-})
+}))
 
 //edit route 
 app.get("/listings/:id/edit",async (req,res)=>{
@@ -96,6 +103,12 @@ app.delete("/listings/:id",async (req,res)=>{
 app.get("/",(req,res)=>{
     res.send("hello konichiwa arigatto namaste nodejs");
 })
+
+//defining a error handling middleware
+app.use((err,req,res,next)=>{
+    res.send("something went wrong");
+})
+
 
 app.listen(port,()=>{
     console.log("app is running on server 8080")
