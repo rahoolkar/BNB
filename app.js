@@ -7,6 +7,7 @@ const path = require("path");
 var methodOverride = require('method-override');
 var engine = require('ejs-mate')
 const wrapAsync = require("./utils/wrapAsync.js");
+const myError = require("./utils/myError.js");
 
 
 app.set("view engine", "ejs");
@@ -28,12 +29,12 @@ main().then(()=>{
 })
 
 //index route 
-app.get("/listings",(req,res)=>{
+app.get("/listings",(req,res,next)=>{
     Listing.find({}).then((result)=>{
         let allListing = result;
         res.render("Listings/index.ejs",{allListing});
     }).catch((error)=>{
-        res.send(":(")
+        next(err);
     })
 })
 
@@ -68,47 +69,53 @@ app.post("/listings",wrapAsync(async(req,res,next)=>{
 }))
 
 //edit route 
-app.get("/listings/:id/edit",async (req,res)=>{
+app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
     let {id} = req.params;
     let node = await Listing.findById(id);
     res.render("Listings/edit.ejs",{node});
-})
+}))
 
 //put request
-app.put("/listings/:id",async (req,res)=>{
+app.put("/listings/:id",wrapAsync(async (req,res)=>{
     let {id} = req.params;
     let node = req.body;
     await Listing.findByIdAndUpdate(id,node);
     res.redirect("/listings");
-})
+}))
 
 //show route
-app.get("/listings/:id",(req,res)=>{
+app.get("/listings/:id",(req,res,next)=>{
     let {id} = req.params;
     Listing.findById(id).then((result)=>{
         let data = result;
         res.render("Listings/show.ejs",{data});
     }).catch((error)=>{
-        res.send(":(");
+        next(err);
     })
 })
 
 //delete request
-app.delete("/listings/:id",async (req,res)=>{
+app.delete("/listings/:id",wrapAsync(async (req,res)=>{
     let {id} = req.params;
     await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
-})
+}))
 
+//Root Route
 app.get("/",(req,res)=>{
     res.send("hello konichiwa arigatto namaste nodejs");
 })
 
-//defining a error handling middleware
-app.use((err,req,res,next)=>{
-    res.send("something went wrong");
+//defining a route jo upar vale sabse check karega and then if it doesnot match with anything then this route will work
+app.all("*",(req,res,next)=>{
+    next(new myError(404,"Route doesnot exists"));
 })
 
+//defining a error handling middleware
+app.use((err,req,res,next)=>{
+    let {status=500,message="some error occured and we are working on it"} = err ;
+    res.status(status).send(message);
+})
 
 app.listen(port,()=>{
     console.log("app is running on server 8080")
