@@ -8,7 +8,7 @@ var methodOverride = require('method-override');
 var engine = require('ejs-mate')
 const wrapAsync = require("./utils/wrapAsync.js");
 const myError = require("./utils/myError.js");
-const listingschema = require("./schema.js");
+const {listingschema,reviewSchema} = require("./schema.js");
 const Review = require("./models/reviews.js");
 
 app.set("view engine", "ejs");
@@ -114,8 +114,19 @@ app.delete("/listings/:id",wrapAsync(async (req,res)=>{
 }))
 
 //Reviews 
+
+//defining a middleware for the review post route
+const validateReview = (req,res,next)=>{
+    let data = req.body;
+    let result = reviewSchema.validate(data);
+    if(result.error){
+        throw new myError(400,result.error);
+    }else{
+        next();
+    }
+}
 //Post Route
-app.post("/listings/:id/reviews",async(req,res)=>{
+app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>{
     let {id} = req.params;
     let data = req.body;
 
@@ -128,7 +139,7 @@ app.post("/listings/:id/reviews",async(req,res)=>{
     await listing.save();
 
     res.redirect(`/listings/${id}`);
-})
+}))
 
 //Root Route
 app.get("/",(req,res)=>{
