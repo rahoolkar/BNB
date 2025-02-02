@@ -2,15 +2,12 @@ const express = require("express");
 const app = express();
 const mongoose = require('mongoose');
 const port = 8080;
-const Listing = require("./models/listing.js");
 const path = require("path");
 var methodOverride = require('method-override');
 var engine = require('ejs-mate')
-const wrapAsync = require("./utils/wrapAsync.js");
 const myError = require("./utils/myError.js");
-const {listingschema,reviewSchema} = require("./schema.js");
-const Review = require("./models/reviews.js");
 const listings = require("./routes/listings.js")
+const reviews = require("./routes/reviews.js")
 
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"/views"));
@@ -30,58 +27,12 @@ main().then(()=>{
     console.log(":(")
 })
 
-//Listings Middleware
-const validateListing = (req,res,next)=>{
-    let data = req.body;
-    let result = listingschema.validate(data);
-    if(result.error){
-        throw new myError(400,result.error);
-    }else{
-        next();
-    }
-}
 
 //Listings Route Router
 app.use("/listings",listings);
 
-
-//Reviews 
-//defining a middleware for the review post route
-const validateReview = (req,res,next)=>{
-    let data = req.body;
-    let result = reviewSchema.validate(data);
-    if(result.error){
-        throw new myError(400,result.error);
-    }else{
-        next();
-    }
-}
-//Post Review Route
-app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>{
-    let {id} = req.params;
-    let data = req.body;
-
-    let new_review = new Review(data);
-    let rr = await new_review.save();
-
-    let listing = await Listing.findById(id);
-    listing.reviews.push(rr);
-
-    await listing.save();
-
-    res.redirect(`/listings/${id}`);
-}))
-
-//Delete Review Route
-app.delete("/listings/:id/reviews/:rid",wrapAsync(async(req,res)=>{
-    let{id,rid} = req.params;
-
-    await Listing.findByIdAndUpdate(id,{$pull:{reviews:rid}});
-
-    await Review.findByIdAndDelete(rid);
-
-    res.redirect(`/listings/${id}`);
-}))
+//Review Route Router
+app.use("/listings/:id/reviews", reviews)
 
 //Root Route
 app.get("/",(req,res)=>{
