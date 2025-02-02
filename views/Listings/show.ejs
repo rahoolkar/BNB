@@ -2,21 +2,17 @@
 <body>
     <div class="row mt-3">
         <div class="col-8 offset-3">
-            <h3>Listing Details</h3>
+            <h3><%= data.title %></h3>
         </div>
         <div class="col-6 offset-3">
             <div class="card show-card">
                 <img src="<%= data.image %>" class="card-img-top show-img" alt="listing-image">
                 <div class="card-body">
-                    <h5 class="card-title"><%= data.title %></h5>
                     <p class="card-text">
-                        <ul>
-                            <li><%= data.title %></li>
-                            <li><%= data.description %></li>
-                            <li>&#8377; <%= data.price.toLocaleString('en-IN') %></li>
-                            <li><%= data.location %></li>
-                            <li><%= data.country %></li>
-                        </ul>
+                        <p><%= data.description %></p>
+                        <p>&#8377; <%= data.price.toLocaleString('en-IN') %></p>
+                        <p><%= data.location %></p>
+                        <p><%= data.country %></p>
                     </p>
                 </div>
             </div>
