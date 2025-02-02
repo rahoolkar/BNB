@@ -10,6 +10,7 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const myError = require("./utils/myError.js");
 const {listingschema,reviewSchema} = require("./schema.js");
 const Review = require("./models/reviews.js");
+const listings = require("./routes/listings.js")
 
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"/views"));
@@ -29,22 +30,7 @@ main().then(()=>{
     console.log(":(")
 })
 
-//index route 
-app.get("/listings",(req,res,next)=>{
-    Listing.find({}).then((result)=>{
-        let allListing = result;
-        res.render("Listings/index.ejs",{allListing});
-    }).catch((error)=>{
-        next(err);
-    })
-})
-
-//new route 
-app.get("/listings/new",(req,res)=>{
-    res.render("Listings/new.ejs")
-})
-
-//defining a middleware for the post route
+//Listings Middleware
 const validateListing = (req,res,next)=>{
     let data = req.body;
     let result = listingschema.validate(data);
@@ -55,66 +41,11 @@ const validateListing = (req,res,next)=>{
     }
 }
 
-//post request
-app.post("/listings",validateListing,wrapAsync(async(req,res,next)=>{
-    let data = req.body;
-    let newData = new Listing(data);
-    await newData.save();
-    res.redirect("/listings");
-    
-    // let data = req.body;
-    // let newData = new Listing(data);
-    // newData.save().then(()=>{
-    //     res.redirect("/listings");
-    // }).catch((err)=>{
-    //     next(err);
-    // })
+//Listings Route Router
+app.use("/listings",listings);
 
-
-    // let {title,description,image,price,location,country} = req.body;
-    // let newData = new Listing({title:title,description:description,image:image,price:price,location:location,country:country});
-    // newData.save().then(()=>{
-    //     res.redirect("/listings")
-    // }).catch(()=>{
-    //     res.send(":(");
-    // })
-}))
-
-//edit route 
-app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    let node = await Listing.findById(id);
-    res.render("Listings/edit.ejs",{node});
-}))
-
-//put request
-app.put("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    let node = req.body;
-    await Listing.findByIdAndUpdate(id,node);
-    res.redirect("/listings");
-}))
-
-//show route
-app.get("/listings/:id",(req,res,next)=>{
-    let {id} = req.params;
-    Listing.findById(id).populate("reviews").then((result)=>{
-        let data = result;
-        res.render("Listings/show.ejs",{data});
-    }).catch((error)=>{
-        next(err);
-    })
-})
-
-//delete request
-app.delete("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
-}))
 
 //Reviews 
-
 //defining a middleware for the review post route
 const validateReview = (req,res,next)=>{
     let data = req.body;
