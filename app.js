@@ -9,6 +9,7 @@ var engine = require('ejs-mate')
 const wrapAsync = require("./utils/wrapAsync.js");
 const myError = require("./utils/myError.js");
 const listingschema = require("./schema.js");
+const Review = require("./models/reviews.js");
 
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"/views"));
@@ -112,6 +113,23 @@ app.delete("/listings/:id",wrapAsync(async (req,res)=>{
     res.redirect("/listings");
 }))
 
+//Reviews 
+//Post Route
+app.post("/listings/:id/reviews",async(req,res)=>{
+    let {id} = req.params;
+    let data = req.body;
+
+    let new_review = new Review(data);
+    let rr = await new_review.save();
+
+    let listing = await Listing.findById(id);
+    listing.reviews.push(rr);
+
+    await listing.save();
+
+    res.redirect(`/listings/${id}`);
+})
+
 //Root Route
 app.get("/",(req,res)=>{
     res.send("hello konichiwa arigatto namaste nodejs");
@@ -127,6 +145,8 @@ app.use((err,req,res,next)=>{
     let {status=500,message="some error occured and we are working on it"} = err ;
     res.render("error.ejs",{status,message});
 })
+
+
 
 app.listen(port,()=>{
     console.log("app is running on server 8080")
