@@ -98,7 +98,7 @@ app.put("/listings/:id",wrapAsync(async (req,res)=>{
 //show route
 app.get("/listings/:id",(req,res,next)=>{
     let {id} = req.params;
-    Listing.findById(id).then((result)=>{
+    Listing.findById(id).populate("reviews").then((result)=>{
         let data = result;
         res.render("Listings/show.ejs",{data});
     }).catch((error)=>{
