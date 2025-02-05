@@ -3,7 +3,16 @@ const app = express();
 var cookieParser = require('cookie-parser')
 
 
-app.use(cookieParser())
+app.use(cookieParser("nazi"));
+
+app.get("/sendsignedcookie",(req,res)=>{
+    res.cookie("name","udayan",{signed : true});
+    res.send("signed cookie sent")
+})
+
+app.get("/showsignedcookie",(req,res)=>{
+    res.send(req.signedCookies);
+})
 
 app.get("/showcookie",(req,res)=>{
     console.log(req.cookies);
