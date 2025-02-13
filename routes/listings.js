@@ -17,6 +17,15 @@ const validateListings = (req,res,next)=>{
     }
 }
 
+//middleware for the authentication 
+const isLoggedIn = function(req,res,next){
+    if(!req.isAuthenticated()){
+        req.flash("error","Please LogIn first :(");
+        return res.redirect("/login");
+    }
+    next();
+}
+
 //index route
 router.get("/",wrapAsync(async(req,res)=>{
     let listings = await Listing.find({});
@@ -24,12 +33,12 @@ router.get("/",wrapAsync(async(req,res)=>{
 }))
 
 //new route 
-router.get("/new",(req,res)=>{
+router.get("/new",isLoggedIn,(req,res)=>{
     res.render("listings/new.ejs");
 })
 
 //edit route
-router.get("/:id/edit",wrapAsync(async(req,res)=>{
+router.get("/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
     let {id} = req.params;
     let listing = await Listing.findById(id);
     if(!listing){
@@ -51,7 +60,7 @@ router.get("/:id",wrapAsync(async(req,res)=>{
 }))
 
 //update route
-router.put("/:id",validateListings,wrapAsync(async(req,res)=>{
+router.put("/:id",validateListings,isLoggedIn,wrapAsync(async(req,res)=>{
     let {id} = req.params ;
     let data = req.body;
     await Listing.findByIdAndUpdate(id,data);
@@ -60,7 +69,7 @@ router.put("/:id",validateListings,wrapAsync(async(req,res)=>{
 }))
 
 //post route
-router.post("/",validateListings,wrapAsync(async(req,res,next)=>{
+router.post("/",validateListings,isLoggedIn,wrapAsync(async(req,res,next)=>{
     let data = req.body;
     let newdata = new Listing(data);
     await newdata.save()
@@ -69,7 +78,7 @@ router.post("/",validateListings,wrapAsync(async(req,res,next)=>{
 }))
 
 //delete route
-router.delete("/:id",wrapAsync(async(req,res)=>{
+router.delete("/:id",isLoggedIn,wrapAsync(async(req,res)=>{
     let {id} = req.params;
     await Listing.findByIdAndDelete(id);
     req.flash("success","Listing deleted!");
