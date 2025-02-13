@@ -57,13 +57,13 @@ app.use("/listings/:id/reviews",review);
 app.use("/signup",user);
 app.use("/login",login);
 
-app.get("/demouser",async(req,res)=>{
-    let fakedata = new User({email:"ghi@google.com",username:"ghi"});
-    let ans = await User.register(fakedata,"ghi@123");
-    // await fakedata.setPassword('abc@123');
-    // await fakedata.save();
-    // const {user} = await User.authenticate()('abc', 'abc@123');
-    res.send(ans);
+app.get("/logout",(req,res)=>{
+    req.logout((error)=>{
+        if(error){
+            return next(error);
+        }
+        req.flash("success","You logged out !")
+    })
 })
 
 //error middleware

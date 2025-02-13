@@ -20,7 +20,7 @@ const validateListings = (req,res,next)=>{
 //middleware for the authentication 
 const isLoggedIn = function(req,res,next){
     if(!req.isAuthenticated()){
-        req.flash("error","Please LogIn first :(");
+        req.flash("error","Please Login first :(");
         return res.redirect("/login");
     }
     next();
