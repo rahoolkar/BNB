@@ -1,8 +1,8 @@
 class myError extends Error{
-    constructor (status,message){
+    constructor(status,messege){
         super();
-        this.status = status ;
-        this.message = message ; 
+        this.status = status;
+        this.messege = messege;
     }
 }
 

@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
+const { type, min } = require("../schema");
 
 const reviewSchema = new mongoose.Schema({
-    comment : String,
+    comment : {
+        type : String,
+        required : true
+    },
     rating : {
         type : Number,
-        min : 1, 
+        min : 1,
         max : 5
     },
     createdAt : {

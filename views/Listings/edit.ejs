@@ -3,10 +3,10 @@
     <div class="row mt-3">
         <div class="col-8 offset-2">
             <h3>Edit Your Listing</h3>
-            <form action="/listings/<%= node._id %>?_method=PUT" method="post" class="needs-validation" novalidate>
+            <form action="/listings/<%= listing._id %>?_method=PUT" method="post" class="needs-validation" novalidate>
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="title" name="title" placeholder="enter title" value="<%= node.title %>" required>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="enter title" value="<%= listing.title %>" required>
                     <div class="valid-feedback">
                         Looks good!
                     </div>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea name="description" class="form-control" id="description" placeholder="enter description" required><%= node.description %></textarea>
+                    <textarea name="description" class="form-control" id="description" placeholder="enter description" required><%= listing.description %></textarea>
                     <div class="valid-feedback">
                         Looks good!
                     </div>
@@ -26,13 +26,13 @@
                 </div>
                 <div class="mb-3">
                     <label for="image" class="form-label">Image</label>
-                    <input type="text" class="form-control" id="image" name="image" placeholder="enter image URL/Link" value="<%= node.image %>">
+                    <input type="text" class="form-control" id="image" name="image" placeholder="enter image URL/Link" value="<%= listing.image %>">
                 </div>
                 <div class="row">
                     <div class="col-4">
                         <div class="mb-3">
                             <label for="price" class="form-label">Price</label>
-                            <input type="number" class="form-control" id="price" name="price" placeholder="enter price" value="<%= node.price %>" required>
+                            <input type="number" class="form-control" id="price" name="price" placeholder="enter price" value="<%= listing.price %>" required>
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -44,7 +44,7 @@
                     <div class="col-8">
                         <div class="mb-3">
                             <label for="country" class="form-label">Country</label>
-                            <input type="text" class="form-control" id="country" name="country" placeholder="enter country" value="<%= node.country %>" required>
+                            <input type="text" class="form-control" id="country" name="country" placeholder="enter country" value="<%= listing.country %>" required>
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -56,7 +56,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="location" class="form-label">Location</label>
-                    <input type="text" class="form-control" id="location" name="location" placeholder="enter location" value="<%= node.location %>" required>
+                    <input type="text" class="form-control" id="location" name="location" placeholder="enter location" value="<%= listing.location %>" required>
                     <div class="valid-feedback">
                         Looks good!
                     </div>

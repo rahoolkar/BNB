@@ -1,57 +1,79 @@
 const express = require("express");
 const app = express();
 const mongoose = require('mongoose');
-const port = 8080;
-const path = require("path");
-var methodOverride = require('method-override');
-var engine = require('ejs-mate')
-const myError = require("./utils/myError.js");
-const listings = require("./routes/listings.js")
-const reviews = require("./routes/reviews.js")
+const Path = require("path");
+const methodOverride = require('method-override')
+const engine = require('ejs-mate')
+const listing = require("./routes/listings.js");
+const review  = require("./routes/review.js");
+const user = require("./routes/signup.js");
+const login  = require("./routes/login.js");
+const session = require('express-session');
+const flash = require('connect-flash');
+var passport = require('passport');
+var LocalStrategy = require('passport-local');
+const User = require("./models/users.js");
 
-app.set("view engine", "ejs");
-app.set("views",path.join(__dirname,"/views"));
-app.use(express.urlencoded({extended:true}));
-app.use(express.json());
-app.use(methodOverride('_method'));
+app.use(express.urlencoded({extended : true}));
+app.use(methodOverride('_method'))
+app.use(express.static(Path.join(__dirname,"/public")));
+app.set("view engine","ejs");
+app.set("views",Path.join(__dirname,"/views"));
 app.engine('ejs', engine);
-app.use(express.static(path.join(__dirname,"/public")));
+
+main().catch(err => console.log(err));
 
 async function main() {
-    mongoose.connect('mongodb://127.0.0.1:27017/bnb');
+    await mongoose.connect('mongodb://127.0.0.1:27017/my_test_db');
 }
 
-main().then(()=>{
-    console.log("connection is created");
-}).catch((error)=>{
-    console.log(":(")
+const sessionOptions = {
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires : Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge : 7 * 24 * 60 * 60 * 1000 ,
+        httpOnly : true
+    }
+}
+
+app.use(session(sessionOptions));
+app.use(flash()); //flash uses express session
+app.use(passport.initialize()); //passport uses express session
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req,res,next)=>{
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
 })
 
+app.use("/listings",listing);
+app.use("/listings/:id/reviews",review);
+app.use("/signup",user);
+app.use("/login",login);
 
-//Listings Route Router
-app.use("/listings",listings);
-
-//Review Route Router
-app.use("/listings/:id/reviews", reviews)
-
-//Root Route
-app.get("/",(req,res)=>{
-    res.send("hello konichiwa arigatto namaste nodejs");
+app.get("/demouser",async(req,res)=>{
+    let fakedata = new User({email:"ghi@google.com",username:"ghi"});
+    let ans = await User.register(fakedata,"ghi@123");
+    // await fakedata.setPassword('abc@123');
+    // await fakedata.save();
+    // const {user} = await User.authenticate()('abc', 'abc@123');
+    res.send(ans);
 })
 
-//defining a route jo upar vale sabse check karega and then if it doesnot match with anything then this route will work
-app.all("*",(req,res,next)=>{
-    next(new myError(404,"Route doesnot exists"));
-})
-
-//defining a error handling middleware
+//error middleware
 app.use((err,req,res,next)=>{
-    let {status=500,message="some error occured and we are working on it"} = err ;
+    let {status = 500,message = "page not found"} = err;
+    console.log(err)
     res.render("error.ejs",{status,message});
 })
 
-
-
-app.listen(port,()=>{
-    console.log("app is running on server 8080")
+app.listen(8080,()=>{
+    console.log("app is running on server 8080");
 })
+

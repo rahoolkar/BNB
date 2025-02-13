@@ -2,26 +2,12 @@ const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const myError = require("../utils/myError.js");
-const {listingschema,reviewSchema} = require("../schema.js");
-const Listing = require("../models/listing.js");
+const {listingschema} = require("../schema.js");
+const Listing = require("../models/listings.js");
 
-//index route 
-router.get("/",(req,res,next)=>{
-    Listing.find({}).then((result)=>{
-        let allListing = result;
-        res.render("Listings/index.ejs",{allListing});
-    }).catch((error)=>{
-        next(err);
-    })
-})
 
-//new route 
-router.get("/new",(req,res)=>{
-    res.render("Listings/new.ejs")
-})
-
-//defining a middleware for the post route
-const validateListing = (req,res,next)=>{
+//middleware for the post route 
+const validateListings = (req,res,next)=>{
     let data = req.body;
     let result = listingschema.validate(data);
     if(result.error){
@@ -31,61 +17,62 @@ const validateListing = (req,res,next)=>{
     }
 }
 
-//post request
-router.post("/",validateListing,wrapAsync(async(req,res,next)=>{
-    let data = req.body;
-    let newData = new Listing(data);
-    await newData.save();
-    res.redirect("/listings");
-    
-    // let data = req.body;
-    // let newData = new Listing(data);
-    // newData.save().then(()=>{
-    //     res.redirect("/listings");
-    // }).catch((err)=>{
-    //     next(err);
-    // })
-
-
-    // let {title,description,image,price,location,country} = req.body;
-    // let newData = new Listing({title:title,description:description,image:image,price:price,location:location,country:country});
-    // newData.save().then(()=>{
-    //     res.redirect("/listings")
-    // }).catch(()=>{
-    //     res.send(":(");
-    // })
+//index route
+router.get("/",wrapAsync(async(req,res)=>{
+    let listings = await Listing.find({});
+    res.render("listings/index.ejs",{listings});
 }))
 
-//edit route 
-router.get("/:id/edit",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    let node = await Listing.findById(id);
-    res.render("Listings/edit.ejs",{node});
-}))
+//new route 
+router.get("/new",(req,res)=>{
+    res.render("listings/new.ejs");
+})
 
-//put request
-router.put("/:id",wrapAsync(async (req,res)=>{
+//edit route
+router.get("/:id/edit",wrapAsync(async(req,res)=>{
     let {id} = req.params;
-    let node = req.body;
-    await Listing.findByIdAndUpdate(id,node);
-    res.redirect("/listings");
+    let listing = await Listing.findById(id);
+    if(!listing){
+        req.flash("error","Listing does not exists :(");
+        req.redirect("/listings");
+    }
+    res.render("listings/edit.ejs",{listing});
 }))
 
 //show route
-router.get("/:id",(req,res,next)=>{
+router.get("/:id",wrapAsync(async(req,res)=>{
     let {id} = req.params;
-    Listing.findById(id).populate("reviews").then((result)=>{
-        let data = result;
-        res.render("Listings/show.ejs",{data});
-    }).catch((error)=>{
-        next(err);
-    })
-})
+    let listing = await Listing.findById(id).populate("reviews");
+    if(!listing){
+        req.flash("error","Listing not found :(")
+        res.redirect("/listings");
+    }
+    res.render("listings/show.ejs",{listing});
+}))
 
-//delete request
-router.delete("/:id",wrapAsync(async (req,res)=>{
+//update route
+router.put("/:id",validateListings,wrapAsync(async(req,res)=>{
+    let {id} = req.params ;
+    let data = req.body;
+    await Listing.findByIdAndUpdate(id,data);
+    req.flash("success","Listing edited!")
+    res.redirect(`/listings/${id}`);
+}))
+
+//post route
+router.post("/",validateListings,wrapAsync(async(req,res,next)=>{
+    let data = req.body;
+    let newdata = new Listing(data);
+    await newdata.save()
+    req.flash("success","New Listing created !")
+    res.redirect("/listings"); 
+}))
+
+//delete route
+router.delete("/:id",wrapAsync(async(req,res)=>{
     let {id} = req.params;
     await Listing.findByIdAndDelete(id);
+    req.flash("success","Listing deleted!");
     res.redirect("/listings");
 }))
 
