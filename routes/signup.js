@@ -12,7 +12,7 @@ router.post("/",wrapAsync(async(req,res)=>{
         let {username,email,password} = req.body;
         let newUser = new User ({username,email});
         await User.register(newUser,password);
-        req.flash("success","Welcome to WanderLust");
+        req.flash("success","Welcome to BNB");
         res.redirect("/listings");
     }catch(error){
         req.flash("error",error.message);

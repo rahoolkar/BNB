@@ -9,7 +9,7 @@ router.get("/",(req,res)=>{
 router.post('/', 
     passport.authenticate('local', { failureRedirect: '/login', failureFlash : true }),
     function(req, res) {
-        req.flash("success","Welcome to WanderLust !");
+        req.flash("success","Welcome to BNB !");
         res.redirect('/listings');
     });
 
