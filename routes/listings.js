@@ -27,6 +27,17 @@ const isLoggedIn = function(req,res,next){
     next();
 }
 
+//middleware for checking owner
+const isOwner = async function(req,res,next){
+    let {id} = req.params ;
+    let node = await Listing.findById(id);
+    if(!node.owner._id.equals(res.locals.curuser._id)){
+        req.flash("error","You don't have permission to edit")
+        return res.redirect(`/listings/${id}`);
+    }
+    next();
+}
+
 //index route
 router.get("/",wrapAsync(async(req,res)=>{
     let listings = await Listing.find({});
@@ -39,7 +50,7 @@ router.get("/new",isLoggedIn,(req,res)=>{
 })
 
 //edit route
-router.get("/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
+router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
     let {id} = req.params;
     let listing = await Listing.findById(id);
     if(!listing){
@@ -61,7 +72,7 @@ router.get("/:id",wrapAsync(async(req,res)=>{
 }))
 
 //update route
-router.put("/:id",validateListings,isLoggedIn,wrapAsync(async(req,res)=>{
+router.put("/:id",isLoggedIn,isOwner,validateListings,wrapAsync(async(req,res)=>{
     let {id} = req.params ;
     let data = req.body;
     await Listing.findByIdAndUpdate(id,data);
@@ -70,7 +81,7 @@ router.put("/:id",validateListings,isLoggedIn,wrapAsync(async(req,res)=>{
 }))
 
 //post route
-router.post("/",validateListings,isLoggedIn,wrapAsync(async(req,res,next)=>{
+router.post("/",isLoggedIn,validateListings,wrapAsync(async(req,res,next)=>{
     let data = req.body;
     let newdata = new Listing(data);
     newdata.owner = req.user._id;
@@ -80,7 +91,7 @@ router.post("/",validateListings,isLoggedIn,wrapAsync(async(req,res,next)=>{
 }))
 
 //delete route
-router.delete("/:id",isLoggedIn,wrapAsync(async(req,res)=>{
+router.delete("/:id",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
     let {id} = req.params;
     await Listing.findByIdAndDelete(id);
     req.flash("success","Listing deleted!");
