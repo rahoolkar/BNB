@@ -49,6 +49,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
+    res.locals.curuser = req.user;
     next();
 })
 
@@ -63,6 +64,7 @@ app.get("/logout",(req,res)=>{
             return next(error);
         }
         req.flash("success","You logged out !")
+        res.redirect("/listings");
     })
 })
 

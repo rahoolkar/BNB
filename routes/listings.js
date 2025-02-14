@@ -20,6 +20,7 @@ const validateListings = (req,res,next)=>{
 //middleware for the authentication 
 const isLoggedIn = function(req,res,next){
     if(!req.isAuthenticated()){
+        req.session.redirecturl = req.originalUrl;
         req.flash("error","Please Login first :(");
         return res.redirect("/login");
     }
@@ -51,7 +52,7 @@ router.get("/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
 //show route
 router.get("/:id",wrapAsync(async(req,res)=>{
     let {id} = req.params;
-    let listing = await Listing.findById(id).populate("reviews");
+    let listing = await Listing.findById(id).populate("reviews").populate("owner");
     if(!listing){
         req.flash("error","Listing not found :(")
         res.redirect("/listings");
@@ -72,6 +73,7 @@ router.put("/:id",validateListings,isLoggedIn,wrapAsync(async(req,res)=>{
 router.post("/",validateListings,isLoggedIn,wrapAsync(async(req,res,next)=>{
     let data = req.body;
     let newdata = new Listing(data);
+    newdata.owner = req.user._id;
     await newdata.save()
     req.flash("success","New Listing created !")
     res.redirect("/listings"); 

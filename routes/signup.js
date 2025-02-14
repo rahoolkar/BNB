@@ -11,11 +11,16 @@ router.post("/",wrapAsync(async(req,res)=>{
     try{
         let {username,email,password} = req.body;
         let newUser = new User ({username,email});
-        await User.register(newUser,password);
-        req.flash("success","Welcome to BNB");
-        res.redirect("/listings");
+        let registeredUser = await User.register(newUser,password);
+        req.login(registeredUser,(error)=>{
+            if(error){
+                return next(error);
+            }
+            req.flash("success","Welcome to BNB");
+            res.redirect("/listings");
+        })
     }catch(error){
-        req.flash("error",error.message);
+        req.flash("error",error.messege);
         res.redirect("/signup");
     }
 }))

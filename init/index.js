@@ -5,7 +5,7 @@ const {data} = require("./data.js");
 main().catch(err => console.log(err));
 
 async function main() {
-    await mongoose.connect('mongodb://127.0.0.1:27017/my_test_db');
+    await mongoose.connect('mongodb://127.0.0.1:27017/bnb');
 }
 
 function deleteDatabase(){
@@ -19,7 +19,10 @@ function deleteDatabase(){
 deleteDatabase();
 
 async function initDatabase(){
-    let result = await Listing.insertMany(data);
+    newdata = data.map((obj)=>{
+        return {...obj,owner : '67af090f4ba72dbf04885c38'}
+    })
+    let result = await Listing.insertMany(newdata);
     console.log(result);
 }
 
