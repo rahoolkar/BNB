@@ -19,10 +19,18 @@ let validateReviews = (req,res,next)=>{
     }
 }
 
+//middleware for authenticating
+const isLoggedIn = function(req,res,next){
+    if(!req.isAuthenticated()){
+            req.flash("error","Please Login in :(");
+            return res.redirect("/login");
+    }
+    next();
+}
+
 //delete request for the review
 router.delete("/:rid",wrapAsync(async(req,res)=>{
     let {lid,rid} = req.params;
-
     await Review.findByIdAndDelete(rid);
     await Listing.findByIdAndUpdate(lid,{ $pull : {reviews : rid} });
     req.flash("success","Review deleted !")
@@ -30,12 +38,12 @@ router.delete("/:rid",wrapAsync(async(req,res)=>{
 }))
 
 //post route for the review 
-router.post("/",validateReviews,wrapAsync(async (req,res)=>{
+router.post("/",isLoggedIn,validateReviews,wrapAsync(async (req,res)=>{
     let data = req.body;
     let {id} = req.params;
     let newReview = new Review(data);
+    newReview.author = req.user._id; 
     let listing = await Listing.findById(id);
-
     listing.reviews.push(newReview);
     await newReview.save();
     await listing.save();
