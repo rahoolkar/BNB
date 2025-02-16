@@ -1,28 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const {getLoginPage,postLogin} = require("../controllers/login");
 
-router.get("/",(req,res)=>{
-    res.render("users/login.ejs");
-})
 
-//middleware for the redirecturl
+//middlware for storing the last visited url
 const redirect = function(req,res,next){
-    if(req.session.redirecturl){
-        res.locals.redirecturl = req.session.redirecturl;
+    if(req.session.lastUrl){
+        res.locals.lastUrl = req.session.lastUrl;
     }
     next();
 }
 
-router.post('/',redirect,
+//getting the login page
+router.get("/",getLoginPage);
+
+//post login route
+router.post('/',redirect, 
     passport.authenticate('local', { failureRedirect: '/login', failureFlash : true }),
-    function(req, res) {
-        req.flash("success","Welcome to BNB !");
-        if(res.locals.redirecturl){
-            res.redirect(res.locals.redirecturl);
-        }else{
-            res.redirect("/listings")
-        }
-    });
+    postLogin);
 
 module.exports = router;

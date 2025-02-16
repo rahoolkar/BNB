@@ -19,11 +19,10 @@ function deleteDatabase(){
 deleteDatabase();
 
 async function initDatabase(){
-    newdata = data.map((obj)=>{
-        return {...obj,owner : '67af090f4ba72dbf04885c38'}
+    let newdata = data.map((obj)=>{
+        return {...obj,owner : '67b22d8a4fb6cb9325721164'}
     })
-    let result = await Listing.insertMany(newdata);
-    console.log(result);
+    await Listing.insertMany(newdata);
 }
 
 initDatabase();

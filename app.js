@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const app = express();
 const mongoose = require('mongoose');
@@ -13,6 +14,7 @@ const flash = require('connect-flash');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 const User = require("./models/users.js");
+const myError = require("./utils/myError.js");
 
 app.use(express.urlencoded({extended : true}));
 app.use(methodOverride('_method'))
@@ -46,10 +48,12 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+
+//middleware 
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
-    res.locals.curuser = req.user;
+    res.locals.user = req.user;
     next();
 })
 
@@ -61,18 +65,23 @@ app.use("/login",login);
 app.get("/logout",(req,res)=>{
     req.logout((error)=>{
         if(error){
-            return next(error);
+            next(error);
+        }else{
+            req.flash("success","You logged out !!")
+            res.redirect("/listings");
         }
-        req.flash("success","You logged out !")
-        res.redirect("/listings");
     })
+})
+
+app.all("*",(req,res,next)=>{
+    throw new myError(404,"Page Bihari le gaye");
 })
 
 //error middleware
 app.use((err,req,res,next)=>{
-    let {status = 500,message = "page not found"} = err;
+    let {status = 500,messege = "page not found"} = err;
     console.log(err)
-    res.render("error.ejs",{status,message});
+    res.render("error.ejs",{status,messege});
 })
 
 app.listen(8080,()=>{

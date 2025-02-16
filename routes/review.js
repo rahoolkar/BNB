@@ -5,7 +5,7 @@ const Listing = require("../models/listings.js");
 const wrapAsync = require("../utils/wrapAsync.js");
 const myError = require("../utils/myError.js");
 const {reviewschema} = require("../schema.js");
-
+const {postReview,deleteReview} = require("../controllers/reviews.js");
 
 //Reviews
 //middleware for the post route for the review
@@ -19,36 +19,31 @@ let validateReviews = (req,res,next)=>{
     }
 }
 
-//middleware for authenticating
+//middleware for the the post route
 const isLoggedIn = function(req,res,next){
     if(!req.isAuthenticated()){
-            req.flash("error","Please Login in :(");
-            return res.redirect("/login");
+        req.session.lastUrl = req.originalUrl;
+        req.flash("error","Please log in first :(");
+        return res.redirect("/login");
+    }
+    next();
+}
+
+//middleware for the delete route
+const isAllowed = async function(req,res,next){
+    let {id,rid} = req.params;
+    let review = await Review.findById(rid);
+    if(!req.user._id.equals(review.author._id)){
+        req.flash("error","You are not permitted to do this. Sorry :(")
+        return res.redirect(`/listings/${id}`);
     }
     next();
 }
 
 //delete request for the review
-router.delete("/:rid",wrapAsync(async(req,res)=>{
-    let {lid,rid} = req.params;
-    await Review.findByIdAndDelete(rid);
-    await Listing.findByIdAndUpdate(lid,{ $pull : {reviews : rid} });
-    req.flash("success","Review deleted !")
-    res.redirect(`/listings/${lid}`);
-}))
+router.delete("/:rid",isLoggedIn,isAllowed,wrapAsync(deleteReview));
 
 //post route for the review 
-router.post("/",isLoggedIn,validateReviews,wrapAsync(async (req,res)=>{
-    let data = req.body;
-    let {id} = req.params;
-    let newReview = new Review(data);
-    newReview.author = req.user._id; 
-    let listing = await Listing.findById(id);
-    listing.reviews.push(newReview);
-    await newReview.save();
-    await listing.save();
-    req.flash("success","Review posted !")
-    res.redirect(`/listings/${id}`);
-}))
+router.post("/",isLoggedIn,validateReviews,wrapAsync(postReview));
 
 module.exports = router;
